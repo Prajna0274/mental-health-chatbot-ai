@@ -12,17 +12,25 @@ import {
   FiHeart,
   FiLogOut,
   FiMenu,
-  FiX
+  FiX,
+  FiUser,
+  FiSettings,
+  FiCalendar,
+  FiCheckSquare
 } from 'react-icons/fi'
 import { supabase } from '@/lib/supabase/client'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: FiHome },
+  { name: 'Profile', href: '/profile', icon: FiUser },
   { name: 'Mood Tracker', href: '/mood', icon: FiSmile },
   { name: 'Journal', href: '/journal', icon: FiBook },
   { name: 'AI Chat', href: '/chat', icon: FiMessageCircle },
+  { name: 'To-Do List', href: '/todo', icon: FiCheckSquare },
+  { name: 'Calendar', href: '/calendar', icon: FiCalendar },
   { name: 'Breathing', href: '/breathing', icon: FiWind },
   { name: 'Meditation', href: '/meditation', icon: FiHeart },
+  { name: 'Settings', href: '/settings', icon: FiSettings },
 ]
 
 export default function Sidebar() {

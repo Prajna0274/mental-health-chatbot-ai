@@ -1,213 +1,182 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { format } from 'date-fns'
-import { FiTrendingUp, FiCalendar, FiHeart, FiStar } from 'react-icons/fi'
-import { getDailyAffirmation } from '@/lib/affirmations'
+import Link from 'next/link'
+import { FiStar, FiCalendar, FiCheckSquare, FiHeart, FiMessageCircle, FiBook, FiWind } from 'react-icons/fi'
 
-interface MoodData {
-  id: string
-  mood_value: number
-  notes: string | null
-  created_at: string
-}
+const thoughtsOfDay = [
+  "You are stronger than you think. Every challenge is an opportunity to grow.",
+  "Take a deep breath. You're exactly where you need to be.",
+  "Progress, not perfection. Every small step counts.",
+  "Be kind to yourself. You deserve the same compassion you give others.",
+  "Your mental health is a priority, not a luxury.",
+  "It's okay to not be okay. Healing isn't linear.",
+  "You are worthy of peace, love, and happiness.",
+  "One day at a time. You're doing better than you think.",
+  "Your journey is unique. Don't compare it to anyone else's.",
+  "Rest is not weakness. It's essential for growth."
+]
 
 export default function DashboardPage() {
-  const [moods, setMoods] = useState<MoodData[]>([])
-  const [streak, setStreak] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [checkedInToday, setCheckedInToday] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [todayThought, setTodayThought] = useState('')
 
   useEffect(() => {
-    fetchData()
+    const saved = localStorage.getItem('userName')
+    if (saved) {
+      setUserName(saved)
+    }
+    
+    // Get thought of the day based on date
+    const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+    setTodayThought(thoughtsOfDay[dayOfYear % thoughtsOfDay.length])
   }, [])
 
-  const fetchData = async () => {
-    try {
-      // Fetch moods
-      const moodsRes = await fetch('/api/moods')
-      const moodsData = await moodsRes.json()
-      setMoods(moodsData.moods || [])
-
-      // Fetch check-ins and streak
-      const checkInsRes = await fetch('/api/check-ins')
-      const checkInsData = await checkInsRes.json()
-      setStreak(checkInsData.streak || 0)
-
-      const today = new Date().toISOString().split('T')[0]
-      const todayCheckIn = checkInsData.checkIns?.find(
-        (ci: any) => ci.check_in_date === today
-      )
-      setCheckedInToday(!!todayCheckIn)
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCheckIn = async () => {
-    try {
-      await fetch('/api/check-ins', { method: 'POST' })
-      setCheckedInToday(true)
-      setStreak(prev => prev + 1)
-    } catch (error) {
-      console.error('Error checking in:', error)
-    }
-  }
-
-  const chartData = moods.map(mood => ({
-    date: format(new Date(mood.created_at), 'MMM dd'),
-    mood: mood.mood_value,
-  }))
-
-  const averageMood = moods.length > 0
-    ? (moods.reduce((sum, m) => sum + m.mood_value, 0) / moods.length).toFixed(1)
-    : '0'
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-12 h-12 rounded-full border-4 border-pastel-lavender-200 border-t-pastel-pink-400 animate-spin"></div>
-      </div>
-    )
-  }
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8 p-6 animate-fadeIn">
-      {/* Affirmation Card - Full Width */}
-      <div className="gradient-lavender rounded-3xl p-8 shadow-soft-lg card-float">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-white/50 rounded-2xl backdrop-blur-sm">
-            <FiStar className="text-pastel-lavender-500 text-3xl" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">Your Daily Affirmation</h1>
-            <p className="text-slate-700 text-lg leading-relaxed italic">"{getDailyAffirmation()}"</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Masonry Grid - Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="min-h-screen bg-gradient-to-br from-pastel-peach-100 via-pastel-lavender-50 to-pastel-pink-100 p-6">
+      <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* Streak Card */}
-        <div className="gradient-peach rounded-3xl p-6 shadow-soft card-float animate-slideUp">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-4 bg-white/60 rounded-2xl backdrop-blur-sm">
-              <FiCalendar className="text-pastel-peach-500 text-3xl" />
+        {/* Welcome Hero */}
+        <div className="relative bg-gradient-to-br from-pastel-peach-300 to-pastel-rose-300 rounded-4xl p-12 shadow-float overflow-hidden">
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h1 className="text-4xl font-bold text-slate-800 mb-2">Hi, {userName}</h1>
+                <p className="text-lg text-slate-700 font-medium">What would you like to do today?</p>
+              </div>
+              <div className="hidden md:block">
+                <div className="w-32 h-32 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <FiHeart className="text-6xl text-white" />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-slate-600 text-sm font-medium">Current Streak</p>
-              <p className="text-4xl font-bold text-slate-800">
-                {streak}
-              </p>
-              <p className="text-slate-700 text-sm">days strong</p>
+            
+            {/* Thought of the Day */}
+            <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-soft">
+              <div className="flex items-start gap-3">
+                <FiStar className="text-2xl text-yellow-500 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-bold text-slate-800 mb-2 text-lg">Thought of the Day</h3>
+                  <p className="text-slate-700 leading-relaxed italic">"{todayThought}"</p>
+                </div>
+              </div>
             </div>
           </div>
-          {!checkedInToday && (
-            <button
-              onClick={handleCheckIn}
-              className="w-full bg-gradient-to-r from-pastel-peach-400 to-pastel-rose-400 hover:from-pastel-peach-500 hover:to-pastel-rose-500 text-white font-semibold py-3 px-4 rounded-2xl transition-all duration-300 shadow-soft hover:shadow-float"
-            >
-              Check In Today ✨
-            </button>
-          )}
-          {checkedInToday && (
-            <div className="text-center py-3 bg-white/60 rounded-2xl backdrop-blur-sm">
-              <span className="text-pastel-mint-600 font-semibold">✓ Checked in today!</span>
-            </div>
-          )}
+          
+          {/* Decorative Elements */}
+          <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-10 right-20 w-20 h-20 bg-white/20 rounded-full blur-2xl"></div>
         </div>
 
-        {/* Average Mood Card */}
-        <div className="gradient-sky rounded-3xl p-6 shadow-soft card-float animate-slideUp" style={{animationDelay: '0.1s'}}>
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/60 rounded-2xl backdrop-blur-sm">
-              <FiTrendingUp className="text-pastel-sky-500 text-3xl" />
-            </div>
-            <div>
-              <p className="text-slate-600 text-sm font-medium">30-Day Average</p>
-              <p className="text-4xl font-bold text-slate-800">
-                {averageMood}
-              </p>
-              <p className="text-slate-700 text-sm">out of 10</p>
-            </div>
+        {/* Quick Actions Grid */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-1 h-6 bg-gradient-to-b from-pastel-lavender-500 to-pastel-pink-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-slate-800">Quick Actions</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* Mood Card */}
+            <Link href="/mood">
+              <div className="group bg-gradient-to-br from-blue-100 to-blue-200 rounded-3xl p-8 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+                <div className="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FiHeart className="text-3xl text-blue-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 text-lg mb-2">Track Mood</h3>
+                <p className="text-slate-700 text-sm">Log how you're feeling today</p>
+              </div>
+            </Link>
+
+            {/* Journal Card */}
+            <Link href="/journal">
+              <div className="group bg-gradient-to-br from-pink-100 to-pink-200 rounded-3xl p-8 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+                <div className="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FiBook className="text-3xl text-pink-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 text-lg mb-2">Journal</h3>
+                <p className="text-slate-700 text-sm">Write your thoughts</p>
+              </div>
+            </Link>
+
+            {/* AI Chat Card */}
+            <Link href="/chat">
+              <div className="group bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl p-8 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+                <div className="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FiMessageCircle className="text-3xl text-purple-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 text-lg mb-2">AI Support</h3>
+                <p className="text-slate-700 text-sm">Chat with your AI companion</p>
+              </div>
+            </Link>
+
+            {/* Breathing Card */}
+            <Link href="/breathing">
+              <div className="group bg-gradient-to-br from-green-100 to-green-200 rounded-3xl p-8 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer">
+                <div className="w-16 h-16 bg-white/40 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <FiWind className="text-3xl text-green-600" />
+                </div>
+                <h3 className="font-bold text-slate-800 text-lg mb-2">Breathe</h3>
+                <p className="text-slate-700 text-sm">Guided breathing exercises</p>
+              </div>
+            </Link>
+
           </div>
         </div>
 
-        {/* Total Entries Card */}
-        <div className="gradient-pink rounded-3xl p-6 shadow-soft card-float animate-slideUp" style={{animationDelay: '0.2s'}}>
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-white/60 rounded-2xl backdrop-blur-sm">
-              <FiHeart className="text-pastel-pink-500 text-3xl" />
-            </div>
-            <div>
-              <p className="text-slate-600 text-sm font-medium">Mood Entries</p>
-              <p className="text-4xl font-bold text-slate-800">
-                {moods.length}
-              </p>
-              <p className="text-slate-700 text-sm">logged so far</p>
-            </div>
+        {/* Wellness Tools */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-1 h-6 bg-gradient-to-b from-pastel-mint-500 to-pastel-sky-500 rounded-full"></div>
+            <h2 className="text-2xl font-bold text-slate-800">Planning & Organization</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <Link href="/todo">
+              <div className="group bg-white rounded-3xl p-6 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer border-2 border-pastel-lavender-200">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 bg-gradient-to-br from-pastel-lavender-400 to-pastel-pink-400 rounded-xl">
+                    <FiCheckSquare className="text-2xl text-white" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 text-lg">To-Do List</h3>
+                </div>
+                <p className="text-slate-600 text-sm">Plan your day with tasks and priorities</p>
+              </div>
+            </Link>
+
+            <Link href="/calendar">
+              <div className="group bg-white rounded-3xl p-6 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer border-2 border-pastel-peach-200">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 bg-gradient-to-br from-pastel-peach-400 to-pastel-rose-400 rounded-xl">
+                    <FiCalendar className="text-2xl text-white" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 text-lg">Calendar</h3>
+                </div>
+                <p className="text-slate-600 text-sm">Mark special days and events</p>
+              </div>
+            </Link>
+
+            <Link href="/profile">
+              <div className="group bg-white rounded-3xl p-6 shadow-soft hover:shadow-float transition-all duration-300 hover:-translate-y-2 cursor-pointer border-2 border-pastel-mint-200">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="p-3 bg-gradient-to-br from-pastel-mint-400 to-pastel-sky-400 rounded-xl">
+                    <FiHeart className="text-2xl text-white" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 text-lg">Your Profile</h3>
+                </div>
+                <p className="text-slate-600 text-sm">Manage your personal information</p>
+              </div>
+            </Link>
+
           </div>
         </div>
-      </div>
 
-      {/* Mood Chart - Large Card */}
-      <div className="bg-white rounded-3xl p-8 shadow-soft-lg card-float animate-scaleIn">
-        <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-          <span className="text-pastel-lavender-500">📊</span> Mood Trend
-        </h2>
-        {chartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#a0a0a0" 
-                style={{ fontSize: '12px' }}
-              />
-              <YAxis 
-                domain={[0, 10]} 
-                stroke="#a0a0a0"
-                style={{ fontSize: '12px' }}
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#ffffff', 
-                  border: 'none', 
-                  borderRadius: '16px',
-                  boxShadow: '0 10px 40px -10px rgba(0, 0, 0, 0.1)',
-                  padding: '12px 16px'
-                }}
-                labelStyle={{ color: '#64748b', fontWeight: 600 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="mood" 
-                stroke="url(#moodGradient)" 
-                strokeWidth={4}
-                dot={{ fill: '#a78bfa', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 8, fill: '#8b5cf6' }}
-              />
-              <defs>
-                <linearGradient id="moodGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#ffa3cc" />
-                  <stop offset="50%" stopColor="#a78bfa" />
-                  <stop offset="100%" stopColor="#5eead4" />
-                </linearGradient>
-              </defs>
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="text-center py-16">
-            <div className="inline-block p-6 bg-gradient-to-br from-pastel-lavender-100 to-pastel-pink-100 rounded-full mb-4">
-              <FiHeart className="text-pastel-lavender-400 text-4xl" />
-            </div>
-            <p className="text-slate-600 text-lg">Start tracking your mood to see beautiful trends</p>
-          </div>
-        )}
+        {/* Motivational Quote */}
+        <div className="text-center py-8">
+          <p className="text-slate-600 text-lg italic">"Take care of your mind. It's the only place you have to live."</p>
+        </div>
+
       </div>
     </div>
   )
