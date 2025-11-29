@@ -1,0 +1,65 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "backend: dev",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"Set-Location 'C:\\Users\\prasa\\OneDrive\\Desktop\\mental-health-ai-chatbot\\backend'; $env:PORT=3333; npm run dev"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "backend: health-check",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"Invoke-RestMethod -Method GET -Uri 'http://localhost:3333/health' | ConvertTo-Json -Depth 5"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "backend: chat-test",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$uri = 'http://localhost:3333/api/chat'; $body = @{ message = 'I feel stressed' } | ConvertTo-Json; Invoke-RestMethod -Method POST -Uri $uri -Body $body -ContentType 'application/json' | ConvertTo-Json -Depth 5"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "backend: chat-test-fixed",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-ExecutionPolicy",
+				"Bypass",
+				"-Command",
+				"$uri = \"http://localhost:3333/api/chat\"; $bodyObj = @{ message = 'I feel stressed' }; $body = $bodyObj | ConvertTo-Json; Invoke-RestMethod -Method POST -Uri $uri -Body $body -ContentType \"application/json\" | ConvertTo-Json -Depth 5"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

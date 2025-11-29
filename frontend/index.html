@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Support Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mental Health Support</h1>
+            <p class="subtitle">A safe space to talk</p>
+        </header>
+
+        <div class="chat-container">
+            <div id="messages" class="messages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>Hello! I'm here to listen and support you. How are you feeling today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Share what's on your mind..."
+                    rows="3"
+                ></textarea>
+                <button id="sendButton">Send</button>
+            </div>
+        </div>
+
+        <footer>
+            <p class="disclaimer">This is a supportive companion, not a replacement for professional help. If you're in crisis, please contact emergency services.</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
